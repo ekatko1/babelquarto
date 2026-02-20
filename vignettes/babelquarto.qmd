@@ -152,7 +152,7 @@ Note that the `_quarto.yml` file created in this process has an example entry se
 ## Previewing your multilingual project {#preview}
 
 Once you have rendered your project, you will have a `_site` or `_book` folder in your project.
-In Quarto you would use `quarto preview` to be able to get a look at what you project looks like.
+In Quarto you would use `quarto preview` to get a look at what your project looks like.
 Because of the way {babelquarto} operates, this isn't possible.
 You can however preview your files using the [{servr} package](https://cran.rstudio.com/web/packages/servr/index.html).
 
@@ -181,6 +181,8 @@ You cannot rely on usual tooling by Quarto because that would only publish the m
 
 You need to publish the entire output folder, including the language folders.
 [Example workflow using GitHub Pages by committing the output folder to a gh-pages branch](https://github.com/ropensci/dev_guide/blob/6f9d066d0207e83588a4d9c8dabd93e015083e13/.github/workflows/dev.yml#L58).
+
+For details on local rendering and publishing to GitHub Pages project sites, see `vignette("local-render")`.
 
 ## Next steps
 
