@@ -134,6 +134,7 @@ render <- function(
     language_codes,
     render_quarto_lang,
     path = path,
+    profile = profile,
     output_dir = output_dir,
     type = type,
     site_url = site_url
@@ -258,6 +259,7 @@ site_url <- function(config_contents, type) {
 render_quarto_lang <- function(
   language_code,
   path,
+  profile,
   output_dir,
   type,
   site_url
@@ -376,7 +378,7 @@ render_quarto_lang <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = language_code
+      profile = c(lang_profile(language_code), profile)
     )
   })
 
