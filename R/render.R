@@ -8,7 +8,7 @@
 #' - once with only `.qmd` as extension for the main language,
 #' - once with `.es.qmd` (using the language code) for each other language.
 #'
-#' You also need to register the language in the configuration file,
+#' You also need to register the language in the `_quarto.yml` configuration file,
 #' see [babelquarto::register_main_language()]
 #' and [babelquarto::register_further_languages()]:
 #'
@@ -24,7 +24,7 @@
 #' @param site_url Override the base URL of the book/website.
 #' If `NULL`, in interactive sessions it will be set to "" to allow
 #' previewing the whole project with `servr::httw()`.
-#' @param profile Quarto profile(s) to use.
+#' @param profile Quarto profile(s) to use (note that languages must be registered in `_quarto.yml`).
 #' @param preview Logical indicating whether to preview the project using
 #' `servr::httw()`.
 #'
