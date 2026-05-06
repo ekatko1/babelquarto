@@ -122,7 +122,7 @@ render <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(main_language, profile)
+      profile = c(lang_profile(main_language), profile)
     )
   })
   fs::dir_copy(

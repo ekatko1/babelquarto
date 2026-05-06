@@ -47,3 +47,11 @@ trim_end <- function(config_lines) {
 
   return(config_lines)
 }
+
+# Return language-specific profile if it exists
+lang_profile <- function(language) {
+  if(file_exists(paste0("_quarto-", language, ".yml"))) {
+    return(language)
+  }
+  NULL
+}
