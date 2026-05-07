@@ -35,33 +35,19 @@ babelquarto:
   file_create(project_dir, "index.qmd")
   file_create(project_dir, "exclude.qmd")
 
-  try(
-    { render_book(project_path = project_dir, profile = "web-book") }
-  )
 
-  expect_equal(
-    { path(project_dir, "_web-book") |>
-        file_exists( ) |>
-        unname()
-    },
-    { TRUE }
-  )
+  render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal(
-    {  path(project_dir, "_web-book", "index.html") |>
-        file_exists( ) |>
-        unname()
-    },
-    { TRUE }
-  )
+  # use to check for file existance
+  path_verif <- function(path = "_web-book") {
+    path(project_dir, path) |>
+      file.exists()
+  }
 
-  expect_equal(
-    {  path(project_dir, "_web-book", "exclude.html") |>
-        file_exists( ) |>
-        unname()
-    },
-    { FALSE }
-  )
+  expect_equal( { path_verif("_web-book")}, { TRUE } )
+  expect_equal( { path_verif(path("_web-book", "index.html"))}, { TRUE } )
+  expect_equal( { path_verif(path("_web-book", "exclude.html"))}, { FALSE } )
+
 
 })
 

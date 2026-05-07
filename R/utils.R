@@ -48,31 +48,42 @@ trim_end <- function(config_lines) {
   return(config_lines)
 }
 
-get_config_file <- function(profile) {
+get_config_path <- function(profile) {
   paste0("_quarto-", profile, ".yml")
 }
 
 # Return language-specific profile if it exists
 lang_profile <- function(language) {
-  if(file_exists( get_config_file(language) ) ) {
+  if(file_exists( get_config_path(language) ) ) {
     return(language)
   }
   NULL
 }
 
+# Get
+get_config <- function(profile) {
+  config <- file.path(path, "_quarto.yml")
 
+  # If it exists, add default profile to config
+  try(silent = T, expr = {
+    config <-
+      read_yaml(config) |>
+      purrr::pluck("profile") |>
+      purrr::pluck("default") |>
+      (function(profile) path(path, get_config_path(profile)) )() |>
+      c(config) |>
+      rev()
+  })
 
-# Recursive merge function
-merge_lists <- function(base, override) {
-  merged <- base
-  for (key in names(override)) {
-    if (key %in% names(base) && is.list(base[[key]]) && is.list(override[[key]])) {
-      # Recursively merge nested lists
-      merged[[key]] <- merge_lists(base[[key]], override[[key]])
-    } else {
-      # Override value
-      merged[[key]] <- override[[key]]
+  if ( nzchar(Sys.getenv("QUARTO_PROFILE", unset="")) ) {
+    config <- c(config, get_config_path( Sys.getenv("QUARTO_PROFILE") ) )
+  }
+
+  if(!is.null(profile)) {
+    for (i in profile) {
+      config <- c(config, path(path, get_config_path(profile)))
     }
   }
-  return(merged)
+
+  return(config)
 }
