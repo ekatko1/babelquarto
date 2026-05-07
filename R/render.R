@@ -83,7 +83,7 @@ render <- function(
     for (i in profile) {
       config <- c(config, path(path, get_config_file(profile)))
     }
-  } else if (Sys.getenv("QUARTO_PROFILE") != null) {
+  } else if (Sys.getenv("QUARTO_PROFILE") != "") {
     config <- c(config, get_config_file( Sys.getenv("QUARTO_PROFILE") ) )
   } else {
     # If it exists, add default profile to config
