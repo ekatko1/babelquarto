@@ -48,10 +48,31 @@ trim_end <- function(config_lines) {
   return(config_lines)
 }
 
+get_config_file <- function(profile) {
+  paste0("_quarto-", profile, ".yml")
+}
+
 # Return language-specific profile if it exists
 lang_profile <- function(language) {
-  if(file_exists(paste0("_quarto-", language, ".yml"))) {
+  if(file_exists( get_config_file(language) ) ) {
     return(language)
   }
   NULL
+}
+
+
+
+# Recursive merge function
+merge_lists <- function(base, override) {
+  merged <- base
+  for (key in names(override)) {
+    if (key %in% names(base) && is.list(base[[key]]) && is.list(override[[key]])) {
+      # Recursively merge nested lists
+      merged[[key]] <- merge_lists(base[[key]], override[[key]])
+    } else {
+      # Override value
+      merged[[key]] <- override[[key]]
+    }
+  }
+  return(merged)
 }

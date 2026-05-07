@@ -78,7 +78,35 @@ render <- function(
 ) {
   # configuration ----
   config <- file.path(path, "_quarto.yml")
-  config_contents <- read_yaml(config)
+
+  if(!is.null(profile)) {
+    for (i in profile) {
+      config <- c(config, path(path, get_config_file(profile)))
+    }
+  } else if (Sys.getenv("QUARTO_PROFILE") != null) {
+    config <- c(config, get_config_file( Sys.getenv("QUARTO_PROFILE") ) )
+  } else {
+    # If it exists, add default profile to config
+    try(silent = T, expr = {
+      config <-
+        read_yaml(config) |>
+        read_yaml() |>
+        purrr::pluck("profile") |>
+        purrr::pluck("default") |>
+        (function(profile) path(path, get_config_file(profile)) )() |>
+        c(config) |>
+        rev()
+    })
+  }
+
+  # Approximate merging of profiles. Ideally, this would be handled via functionality provided by quarto itself
+  config_contents <- read_yaml(config[1])
+  if(length(config)>1) {
+    for(i in 2:length(config)) {
+      config_contents <- merge_lists(config_contents, read_yaml(config[i]))
+    }
+  }
+
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
