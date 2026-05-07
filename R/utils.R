@@ -48,41 +48,46 @@ trim_end <- function(config_lines) {
   return(config_lines)
 }
 
-get_config_path <- function(profile) {
-  paste0("_quarto-", profile, ".yml")
+get_config_path <- function(path, profile) {
+  fs::path(path, paste0("_quarto-", profile, ".yml"))
 }
 
-# Return language-specific profile if it exists
-lang_profile <- function(language) {
-  if(file_exists( get_config_path(language) ) ) {
-    return(language)
+# Return only profiles that exist
+if_exists <- function(path=".",  profile=NULL, language=NULL, return_path = FALSE) {
+  if(is.null(profile) && is.null(language)) {
+    return(NULL)
+  } else if(is.null(profile) && !is.null(language)) {
+    profile_name = language
+  } else if (!is.null(profile) && is.null(language)) {
+    profile_name = profile
+  } else {
+    profile_name = paste0(profile, "-", language)
   }
-  NULL
+  config = get_config_path(path, profile_name)
+  exists = purrr::map_lgl(config, file_exists)
+  if(return_path) return(config[exists])
+  profile_name[exists]
 }
 
-# Get
-get_config <- function(profile) {
+
+# Get configuration files, in order from lowest to highest priority
+get_config <- function(path, profile) {
   config <- file.path(path, "_quarto.yml")
 
   # If it exists, add default profile to config
   try(silent = T, expr = {
-    config <-
-      read_yaml(config) |>
+    default_config = read_yaml(config) |>
       purrr::pluck("profile") |>
-      purrr::pluck("default") |>
-      (function(profile) path(path, get_config_path(profile)) )() |>
-      c(config) |>
-      rev()
+      purrr::pluck("default")
+    config <- c(config, if_exists(path=path, profile = default_config, return_path=T))
   })
 
   if ( nzchar(Sys.getenv("QUARTO_PROFILE", unset="")) ) {
-    config <- c(config, get_config_path( Sys.getenv("QUARTO_PROFILE") ) )
+    config <- c(config, get_config_path(path, Sys.getenv("QUARTO_PROFILE") ) )
   }
 
   if(!is.null(profile)) {
-    for (i in profile) {
-      config <- c(config, path(path, get_config_path(profile)))
-    }
+    config <- c(config, get_config_path(path, profile))
   }
 
   return(config)

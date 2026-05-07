@@ -77,7 +77,11 @@ render <- function(
   preview
 ) {
   # configuration ----
-  config = get_config(profile)
+  if(is.null(if_exists(path=path, profile=profile))) {
+    warning("supplied profile does not exist. Falling back to default profile.")
+    profile=NULL
+  }
+  config = get_config(path, profile)
 
   # Approximate merging of profiles. Ideally, this would be handled via functionality provided by quarto itself
   config_contents <- read_yaml(config[1])
@@ -130,7 +134,9 @@ render <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(lang_profile(main_language), profile)
+      profile = c(if_exists(path = ".", language = main_language),
+                  if_exists(path = ".", profile = profile),
+                  if_exists(path = ".", language = main_language))
     )
   })
   fs::dir_copy(
@@ -143,6 +149,7 @@ render <- function(
     render_quarto_lang,
     path = path,
     profile = profile,
+    config = config_contents,
     output_dir = output_dir,
     type = type,
     site_url = site_url
@@ -268,16 +275,18 @@ render_quarto_lang <- function(
   language_code,
   path,
   profile,
+  config,
   output_dir,
   type,
   site_url
 ) {
   temporary_directory <- withr::local_tempdir()
+  browser()
+
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
 
   config_path <- file.path(temporary_directory, project_name, "_quarto.yml")
-  config <- read_yaml(config_path)
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(temporary_directory, project_name, "_freeze")
@@ -349,7 +358,6 @@ render_quarto_lang <- function(
       file = file.path(temporary_directory, project_name, "_quarto.yml")
     )
   }
-
   if (type == "website") {
     # only keep what's needed
     qmds <- fs::dir_ls(
@@ -386,7 +394,9 @@ render_quarto_lang <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(lang_profile(language_code), profile)
+      profile = c(if_exists(path=".", language=language_code), #lo priority
+                  profile,
+                  if_exists(path=".", language=language_code, profile = profile)) # hi priority
     )
   })
 
