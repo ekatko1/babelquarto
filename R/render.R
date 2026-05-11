@@ -8,7 +8,7 @@
 #' - once with only `.qmd` as extension for the main language,
 #' - once with `.es.qmd` (using the language code) for each other language.
 #'
-#' You also need to register the language in the `_quarto.yml` configuration file,
+#' You also need to register the language in the `_quarto.yml` configuration file, another configuration profile,
 #' see [babelquarto::register_main_language()]
 #' and [babelquarto::register_further_languages()]:
 #'
@@ -24,12 +24,22 @@
 #' @param site_url Override the base URL of the book/website.
 #' If `NULL`, in interactive sessions it will be set to "" to allow
 #' previewing the whole project with `servr::httw()`.
-#' @param profile Quarto profile(s) to use (note that languages must be registered in `_quarto.yml`).
+#' @param profile Quarto profile(s) to use (see note below).
 #' @param preview Logical indicating whether to preview the project using
 #' `servr::httw()`.
 #'
 #' @return Nothing, called for its side-effect of rendering a project.
 #' @export
+#'
+#' @note Profiles
+#' Currently, profile support is limited. `babelquarto` works with
+#' default profiles (see \href{https://quarto.org/docs/projects/profiles.html#default-profile}{Quarto documentation}),
+#' the `QUARTO_PROFILE` environemnt variable,
+#' and the `profile` parameter
+#' Configuration profiles should also be \href{https://quarto.org/docs/projects/quarto-projects.html#metadata-merging}{merged as expected}.
+#' However, \href{profile-specific content}{https://quarto.org/docs/projects/profiles.html#profile-content} has not been tested and may not work especially for addional languages.
+#' Metadata specified at the directory-level may result in undefined behavor.
+#'
 #'
 #' @examples
 #' directory <- withr::local_tempdir()

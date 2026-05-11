@@ -26,7 +26,7 @@ render_website(
 If \code{NULL}, in interactive sessions it will be set to "" to allow
 previewing the whole project with \code{servr::httw()}.}
 
-\item{profile}{Quarto profile(s) to use (note that languages must be registered in \verb{_quarto.yml}).}
+\item{profile}{Quarto profile(s) to use (see note below).}
 
 \item{preview}{Logical indicating whether to preview the project using
 \code{servr::httw()}.}
@@ -46,7 +46,7 @@ with the same basename but,
 \item once with \code{.es.qmd} (using the language code) for each other language.
 }
 
-You also need to register the language in the \verb{_quarto.yml} configuration file,
+You also need to register the language in the \verb{_quarto.yml} configuration file, another configuration profile,
 see \code{\link[=register_main_language]{register_main_language()}}
 and \code{\link[=register_further_languages]{register_further_languages()}}:
 
@@ -54,6 +54,16 @@ and \code{\link[=register_further_languages]{register_further_languages()}}:
   mainlanguage: 'en'
   languages: ['es', 'fr']
 }\if{html}{\out{</div>}}
+}
+\note{
+Profiles
+Currently, profile support is limited. \code{babelquarto} works with
+default profiles (see \href{https://quarto.org/docs/projects/profiles.html#default-profile}{Quarto documentation}),
+the \code{QUARTO_PROFILE} environemnt variable,
+and the \code{profile} parameter
+Configuration profiles should also be \href{https://quarto.org/docs/projects/quarto-projects.html#metadata-merging}{merged as expected}.
+However, \href{profile-specific content}{https://quarto.org/docs/projects/profiles.html#profile-content} has not been tested and may not work especially for addional languages.
+Metadata specified at the directory-level may result in undefined behavor.
 }
 \examples{
 directory <- withr::local_tempdir()
