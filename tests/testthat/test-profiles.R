@@ -45,8 +45,8 @@ babelquarto:
   }
 
   expect_equal( { path_verif("_web-book")}, { TRUE } )
-  expect_equal( { path_verif(path("_web-book", "index.html"))}, { TRUE } )
-  expect_equal( { path_verif(path("_web-book", "exclude.html"))}, { FALSE } )
+  expect_equal( { path_verif(fs::path("_web-book", "index.html"))}, { TRUE } )
+  expect_equal( { path_verif(fs::path("_web-book", "exclude.html"))}, { FALSE } )
 
 })
 
@@ -102,8 +102,8 @@ babelquarto:
   }
 
   expect_equal( { path_verif("_web-book")}, { TRUE } )
-  expect_equal( { path_verif(path("_web-book", "index.html"))}, { TRUE } )
-  expect_equal( { path_verif(path("_web-book", "exclude.html"))}, { FALSE } )
+  expect_equal( { path_verif(fs::path("_web-book", "index.html"))}, { TRUE } )
+  expect_equal( { path_verif(fs::path("_web-book", "exclude.html"))}, { FALSE } )
 
 })
 
