@@ -284,10 +284,13 @@ render_quarto_lang <- function(
 
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
+  config_path <- fs::path(temporary_directory, project_name, "_quarto.yml")
 
-  config_path <- fs::path(temporary_directory, project_name) |> get_config_path(language_code)
-  if(fs::file_exists(config_path)) {
-    config = modifyList(config, yaml::read_yaml(config_path))
+  # language-specific config
+  lang_config_path <- fs::path(temporary_directory, project_name) |>
+    get_config_path(language_code)
+  if (fs::file_exists(lang_config_path)) {
+    config = modifyList(config, yaml::read_yaml(lang_config_path))
   }
 
   freeze_directory_exists <- fs::dir_exists(
@@ -386,7 +389,6 @@ render_quarto_lang <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = language_code
     )
   })
 
