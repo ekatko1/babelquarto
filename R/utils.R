@@ -92,7 +92,10 @@ get_config <- function(path, profile) {
     )
   })
 
-  if (nzchar(Sys.getenv("QUARTO_PROFILE", unset = ""))) {
+  # Use environment variable if no profile supplied
+  if (
+    nzchar(Sys.getenv("QUARTO_PROFILE", unset = "")) && !any(nzchar(profile))
+  ) {
     config <- c(config, get_config_path(path, Sys.getenv("QUARTO_PROFILE")))
   }
 
