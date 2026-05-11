@@ -26,7 +26,7 @@ render_website(
 If \code{NULL}, in interactive sessions it will be set to "" to allow
 previewing the whole project with \code{servr::httw()}.}
 
-\item{profile}{Quarto profile(s) to use.}
+\item{profile}{Quarto profile(s) to use (note that languages must be registered in \verb{_quarto.yml}).}
 
 \item{preview}{Logical indicating whether to preview the project using
 \code{servr::httw()}.}
@@ -46,7 +46,7 @@ with the same basename but,
 \item once with \code{.es.qmd} (using the language code) for each other language.
 }
 
-You also need to register the language in the configuration file,
+You also need to register the language in the \verb{_quarto.yml} configuration file,
 see \code{\link[=register_main_language]{register_main_language()}}
 and \code{\link[=register_further_languages]{register_further_languages()}}:
 
