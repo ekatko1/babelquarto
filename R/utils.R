@@ -69,7 +69,7 @@ if_exists <- function(
     profile_name = paste0(profile, "-", language)
   }
   config = get_config_path(path, profile_name)
-  exists = purrr::map_lgl(config, file_exists)
+  exists = purrr::map_lgl(config, fs::file_exists)
   if (return_path) {
     return(config[exists])
   }
