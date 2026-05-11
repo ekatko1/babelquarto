@@ -36,7 +36,7 @@
 #' default profiles (see \href{https://quarto.org/docs/projects/profiles.html#default-profile}{Quarto documentation}),
 #' the `QUARTO_PROFILE` environemnt variable,
 #' and the `profile` parameter
-#' Configuration profiles should also be \href{https://quarto.org/docs/projects/quarto-projects.html#metadata-merging}{merged as expected}.
+#' Configuration profiles may not always be \href{https://quarto.org/docs/projects/quarto-projects.html#metadata-merging}{merged as expected}, especially in additional languages, where default keys may be overwritten instead of merged.
 #' However, \href{profile-specific content}{https://quarto.org/docs/projects/profiles.html#profile-content} has not been tested and may not work especially for addional languages.
 #' Metadata specified at the directory-level may result in undefined behavor.
 #'
