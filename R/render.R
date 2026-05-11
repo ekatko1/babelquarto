@@ -77,20 +77,19 @@ render <- function(
   preview
 ) {
   # configuration ----
-  if(is.null(if_exists(path=path, profile=profile))) {
+  if (is.null(if_exists(path = path, profile = profile))) {
     warning("supplied profile does not exist. Falling back to default profile.")
-    profile=NULL
+    profile = NULL
   }
   config = get_config(path, profile)
 
-  # Approximate merging of profiles. Ideally, this would be handled via functionality provided by quarto itself
+  # merge config profiles
   config_contents <- read_yaml(config[1])
-  if(length(config)>1) {
-    for(i in 2:length(config)) {
+  if (length(config) > 1) {
+    for (i in 2:length(config)) {
       config_contents <- modifyList(config_contents, read_yaml(config[i]))
     }
   }
-
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
@@ -134,9 +133,11 @@ render <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(if_exists(path = ".", language = main_language),
-                  if_exists(path = ".", profile = profile),
-                  if_exists(path = ".", language = main_language))
+      profile = c(
+        if_exists(path = ".", language = main_language),
+        if_exists(path = ".", profile = profile),
+        if_exists(path = ".", language = main_language)
+      )
     )
   })
   fs::dir_copy(
@@ -148,7 +149,6 @@ render <- function(
     language_codes,
     render_quarto_lang,
     path = path,
-    profile = profile,
     config = config_contents,
     output_dir = output_dir,
     type = type,
@@ -274,19 +274,20 @@ site_url <- function(config_contents, type) {
 render_quarto_lang <- function(
   language_code,
   path,
-  profile,
   config,
   output_dir,
   type,
   site_url
 ) {
   temporary_directory <- withr::local_tempdir()
-  browser()
 
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
 
-  config_path <- file.path(temporary_directory, project_name, "_quarto.yml")
+  config_path <- file.path(temporary_directory, project_name, paste0("_quarto-", language_code, ".yml"))
+  if(fs::file_exists(config_path)) {
+    modifyList(config, yaml::read_yaml(config_path))
+  }
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(temporary_directory, project_name, "_freeze")
@@ -350,13 +351,6 @@ render_quarto_lang <- function(
       book_name = project_name,
       directory = temporary_directory
     )
-    # Replace TRUE and FALSE with 'true' and 'false'
-    # to avoid converting to "yes" and "no"
-    config <- replace_true_false(config)
-    yaml::write_yaml(
-      config,
-      file = file.path(temporary_directory, project_name, "_quarto.yml")
-    )
   }
   if (type == "website") {
     # only keep what's needed
@@ -376,15 +370,12 @@ render_quarto_lang <- function(
         sub(sprintf("%s.qmd", language_code), "qmd", qmd_path)
       )
     }
-    # Replace TRUE and FALSE with 'true' and 'false'
-    # to avoid converting to "yes" and "no"
-    config <- replace_true_false(config)
-
-    yaml::write_yaml(config, file = config_path)
   }
 
-  config_lines <- brio::read_lines(config_path)
-  brio::write_lines(config_lines, path = config_path)
+  # Replace TRUE and FALSE with 'true' and 'false'
+  # to avoid converting to "yes" and "no"
+  config <- replace_true_false(config)
+  yaml::write_yaml(config, file = config_path)
 
   # Render language book
   metadata <- list("yes")
@@ -394,9 +385,7 @@ render_quarto_lang <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(if_exists(path=".", language=language_code), #lo priority
-                  profile,
-                  if_exists(path=".", language=language_code, profile = profile)) # hi priority
+      profile = language_code
     )
   })
 

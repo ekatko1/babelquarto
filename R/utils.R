@@ -53,10 +53,15 @@ get_config_path <- function(path, profile) {
 }
 
 # Return only profiles that exist
-if_exists <- function(path=".",  profile=NULL, language=NULL, return_path = FALSE) {
-  if(is.null(profile) && is.null(language)) {
+if_exists <- function(
+  path = ".",
+  profile = NULL,
+  language = NULL,
+  return_path = FALSE
+) {
+  if (is.null(profile) && is.null(language)) {
     return(NULL)
-  } else if(is.null(profile) && !is.null(language)) {
+  } else if (is.null(profile) && !is.null(language)) {
     profile_name = language
   } else if (!is.null(profile) && is.null(language)) {
     profile_name = profile
@@ -65,7 +70,9 @@ if_exists <- function(path=".",  profile=NULL, language=NULL, return_path = FALS
   }
   config = get_config_path(path, profile_name)
   exists = purrr::map_lgl(config, file_exists)
-  if(return_path) return(config[exists])
+  if (return_path) {
+    return(config[exists])
+  }
   profile_name[exists]
 }
 
@@ -79,14 +86,17 @@ get_config <- function(path, profile) {
     default_config = read_yaml(config) |>
       purrr::pluck("profile") |>
       purrr::pluck("default")
-    config <- c(config, if_exists(path=path, profile = default_config, return_path=T))
+    config <- c(
+      config,
+      if_exists(path = path, profile = default_config, return_path = T)
+    )
   })
 
-  if ( nzchar(Sys.getenv("QUARTO_PROFILE", unset="")) ) {
-    config <- c(config, get_config_path(path, Sys.getenv("QUARTO_PROFILE") ) )
+  if (nzchar(Sys.getenv("QUARTO_PROFILE", unset = ""))) {
+    config <- c(config, get_config_path(path, Sys.getenv("QUARTO_PROFILE")))
   }
 
-  if(!is.null(profile)) {
+  if (!is.null(profile)) {
     config <- c(config, get_config_path(path, profile))
   }
 
