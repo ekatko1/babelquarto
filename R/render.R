@@ -79,9 +79,10 @@ render <- function(
   # configuration ----
   for (i in profile) {
     if (i != "" & is.null(if_exists(path = path, profile = i))) {
-      warning(paste0("supplied profile `", i ,"` does not exist."))
+      warning(paste0("supplied profile `", i, "` does not exist."))
     }
   }
+
   config = get_config(path, profile)
 
   # merge config profiles
@@ -281,7 +282,6 @@ render_quarto_lang <- function(
   site_url
 ) {
   temporary_directory <- withr::local_tempdir()
-
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
   config_path <- fs::path(temporary_directory, project_name, "_quarto.yml")
@@ -386,11 +386,10 @@ render_quarto_lang <- function(
   # Render language book
   metadata <- list("yes")
   names(metadata) <- sprintf("lang-%s", language_code)
-
-  withr::with_dir(file.path(temporary_directory, project_name), {
+  withr::with_dir(fs::path(temporary_directory, project_name), {
     quarto::quarto_render(
       as_job = FALSE,
-      metadata = metadata,
+      metadata = metadata
     )
   })
 
