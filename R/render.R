@@ -77,9 +77,10 @@ render <- function(
   preview
 ) {
   # configuration ----
-  if (is.null(if_exists(path = path, profile = profile))) {
-    warning("supplied profile does not exist. Falling back to default profile.")
-    profile = NULL
+  for (i in profile) {
+    if (i != "" & is.null(if_exists(path = path, profile = i))) {
+      warning(paste0("supplied profile `", i ,"` does not exist."))
+    }
   }
   config = get_config(path, profile)
 
