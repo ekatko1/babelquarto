@@ -99,7 +99,7 @@ render <- function(
   config_contents <- read_yaml(config[1])
   if (length(config) > 1) {
     for (i in 2:length(config)) {
-      config_contents <- purrr::list_merge(config_contents, !!! read_yaml(config[i]))
+      config_contents <- modifyList(config_contents, read_yaml(config[i]))
     }
   }
 
@@ -300,7 +300,7 @@ render_quarto_lang <- function(
   lang_config_path <- fs::path(temporary_directory, project_name) |>
     get_config_path(language_code)
   if (fs::file_exists(lang_config_path)) {
-    config = purrr::list_merge(config, !!! yaml::read_yaml(lang_config_path))
+    config = modifyList(config, yaml::read_yaml(lang_config_path))
   }
 
   freeze_directory_exists <- fs::dir_exists(
