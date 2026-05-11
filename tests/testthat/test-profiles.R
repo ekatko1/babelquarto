@@ -40,8 +40,8 @@ babelquarto:
 
   # use to check for file existance
   path_verif <- function(path = "_web-book") {
-    path(project_dir, path) |>
-      fs::file.exists()
+    fs::path(project_dir, path) |>
+      file.exists()
   }
 
   expect_equal( { path_verif("_web-book")}, { TRUE } )
