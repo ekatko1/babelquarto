@@ -287,7 +287,7 @@ render_quarto_lang <- function(
 
   config_path <- file.path(temporary_directory, project_name, paste0("_quarto-", language_code, ".yml"))
   if(fs::file_exists(config_path)) {
-    modifyList(config, yaml::read_yaml(config_path))
+    config = modifyList(config, yaml::read_yaml(config_path))
   }
 
   freeze_directory_exists <- fs::dir_exists(
