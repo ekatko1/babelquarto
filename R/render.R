@@ -285,7 +285,7 @@ render_quarto_lang <- function(
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
 
-  config_path <- file.path(temporary_directory, project_name, paste0("_quarto-", language_code, ".yml"))
+  config_path <- fs::path(temporary_directory, project_name) |> get_config_path(language_code)
   if(fs::file_exists(config_path)) {
     config = modifyList(config, yaml::read_yaml(config_path))
   }
