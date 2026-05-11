@@ -305,6 +305,8 @@ render_quarto_lang <- function(
     )
   }
 
+  config[["profile"]] <- NULL # Settings from default profile already merged
+
   config[["lang"]] <- language_code
 
   config[[type]][["site-url"]] <- if (endsWith(site_url, "/")) {
