@@ -46,7 +46,7 @@ with the same basename but,
 \item once with \code{.es.qmd} (using the language code) for each other language.
 }
 
-You also need to register the language in the \verb{_quarto.yml} configuration file, another configuration profile,
+You also need to register the the main and additional languages in the Quarto configuration file (\verb{_quarto.yml} by default)
 see \code{\link[=register_main_language]{register_main_language()}}
 and \code{\link[=register_further_languages]{register_further_languages()}}:
 
@@ -59,10 +59,10 @@ and \code{\link[=register_further_languages]{register_further_languages()}}:
 Profiles
 Currently, profile support is limited. \code{babelquarto} works with
 default profiles (see \href{https://quarto.org/docs/projects/profiles.html#default-profile}{Quarto documentation}),
-the \code{QUARTO_PROFILE} environemnt variable,
+the \code{QUARTO_PROFILE} environment variable,
 and the \code{profile} parameter
 Configuration profiles may not always be \href{https://quarto.org/docs/projects/quarto-projects.html#metadata-merging}{merged as expected}, especially in additional languages, where default keys may be overwritten instead of merged.
-However, \href{profile-specific content}{https://quarto.org/docs/projects/profiles.html#profile-content} has not been tested and may not work especially for addional languages.
+However, \href{profile-specific content}{https://quarto.org/docs/projects/profiles.html#profile-content} has not been tested and may not work especially for additional languages.
 Metadata specified at the directory-level may result in undefined behavor.
 }
 \examples{
