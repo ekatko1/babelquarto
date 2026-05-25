@@ -94,14 +94,9 @@ render <- function(
   }
 
   config = get_config(path, profile)
-
-  # merge config profiles
-  config_contents <- read_yaml(config[1])
-  if (length(config) > 1) {
-    for (i in 2:length(config)) {
-      config_contents <- modifyList(config_contents, read_yaml(config[i]))
-    }
-  }
+  config_contents <- config |>
+    purrr::map(read_yaml) |>
+    purrr::reduce(modifyList, .dir="forward")
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
