@@ -143,7 +143,7 @@ render <- function(
       profile = c(
         if_exists(path = ".", language = main_language),
         if_exists(path = ".", profile = profile),
-        if_exists(path = ".", language = main_language)
+        if_exists(path = ".", profile = profile, language = main_language)
       )
     )
   })
