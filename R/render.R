@@ -8,7 +8,7 @@
 #' - once with only `.qmd` as extension for the main language,
 #' - once with `.es.qmd` (using the language code) for each other language.
 #'
-#' You also need to register the language in the `_quarto.yml` configuration file, another configuration profile,
+#' You also need to register the the main and additional languages in the Quarto configuration file (`_quarto.yml` by default)
 #' see [babelquarto::register_main_language()]
 #' and [babelquarto::register_further_languages()]:
 #'
