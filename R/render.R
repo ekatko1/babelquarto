@@ -116,7 +116,7 @@ render <- function(
   profile <- profile %||% Sys.getenv("QUARTO_PROFILE")
   fs::dir_copy(path, temporary_directory)
   withr::with_dir(file.path(temporary_directory, fs::path_file(path)), {
-    fs::file_delete(fs::dir_ls(regexp = "\\...\\.qmd", recurse = TRUE))
+    fs::file_delete(fs::dir_ls(regexp = "\\...\\.qmd|\\...\\.Rmd|\\...\\.ipynb", recurse = TRUE))
     metadata <- list("true")
     names(metadata) <- sprintf("lang-%s", main_language)
     quarto::quarto_render(
@@ -341,22 +341,38 @@ render_quarto_lang <- function(
   }
 
   if (type == "website") {
-    # only keep what's needed
+    # only keep what's needed, includes .qmd & .ipynb files
     qmds <- fs::dir_ls(
       file.path(temporary_directory, fs::path_file(path)),
-      glob = "*.qmd",
+      glob = "*.qmd|*.Rmd|*.ipynb",
       recurse = TRUE
     )
-    language_qmds <- purrr::keep(
+    language_files <- purrr::keep(
       qmds,
-      \(x) endsWith(x, sprintf(".%s.qmd", language_code))
-    )
-    fs::file_delete(qmds[!(qmds %in% language_qmds)])
-    for (qmd_path in language_qmds) {
-      fs::file_move(
-        qmd_path,
-        sub(sprintf("%s.qmd", language_code), "qmd", qmd_path)
+      \(x) any(
+        endsWith(x, sprintf(".%s.qmd", language_code)),
+        endsWith(x, sprintf(".%s.Rmd", language_code)),
+        endsWith(x, sprintf(".%s.ipynb", language_code))
       )
+    )
+    fs::file_delete(qmds[!(qmds %in% language_files)])
+    for (file_path in language_files) {
+      # ensure that files are moved correctl, depending on ending
+      if (endsWith(file_path, ".qmd")){
+      fs::file_move(
+        file_path,
+        sub(sprintf("%s.qmd", language_code), "qmd", file_path)
+      )}
+      else if (endsWith(file_path, ".Rmd")){
+        fs::file_move(
+          file_path,
+          sub(sprintf("%s.Rmd", language_code), "Rmd", file_path)
+        )}
+      else {
+      fs::file_move(
+        file_path,
+        sub(sprintf("%s.ipynb", language_code), "ipynb", file_path)
+      )}
     }
     # Replace TRUE and FALSE with 'true' and 'false'
     # to avoid converting to "yes" and "no"
