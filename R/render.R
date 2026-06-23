@@ -77,29 +77,28 @@ render <- function(
   preview
 ) {
   # configuration ----
-  config <- file.path(path, "_quarto.yml")
-  config_contents <- read_yaml(config)
+  proj_config = quarto::quarto_inspect(input=path, profile=profile)$config
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
   }
   site_url <- site_url %||%
-    site_url(config_contents = config_contents, type = type)
+    site_url(proj_config = proj_config, type = type)
 
-  output_dir <- config_contents[["project"]][["output-dir"]] %||%
+  output_dir <- proj_config[["project"]][["output-dir"]] %||%
     switch(
       type,
       book = "_book",
       website = "_site"
     )
 
-  language_codes <- config_contents[["babelquarto"]][["languages"]]
+  language_codes <- proj_config[["babelquarto"]][["languages"]]
   if (is.null(language_codes)) {
     cli::cli_abort(
       "Can't find {.field babelquarto.languages} in {.field _quarto.yml}"
     ) # nolint: line_length_linter
   }
-  main_language <- config_contents[["babelquarto"]][["mainlanguage"]]
+  main_language <- proj_config[["babelquarto"]][["mainlanguage"]]
   if (is.null(main_language)) {
     cli::cli_abort(
       "Can't find {.field babelquarto.mainlanguage} in {.field _quarto.yml}"
@@ -113,6 +112,7 @@ render <- function(
 
   # render project ----
   temporary_directory <- withr::local_tempdir()
+  # ensure default profile is
   profile <- profile %||% Sys.getenv("QUARTO_PROFILE")
   fs::dir_copy(path, temporary_directory)
   withr::with_dir(file.path(temporary_directory, fs::path_file(path)), {
@@ -122,7 +122,7 @@ render <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = c(main_language, profile)
+      profile = profile
     )
   })
   fs::dir_copy(
@@ -136,7 +136,8 @@ render <- function(
     path = path,
     output_dir = output_dir,
     type = type,
-    site_url = site_url
+    site_url = site_url,
+    profile = profile
   )
 
   ## sitemap fixing ---
@@ -165,7 +166,6 @@ render <- function(
 
   # Add the language switching link to the sidebar ----
   ## For the main language ----
-
   # we need to recurse but not inside the language folders!
   all_docs <- fs::dir_ls(output_folder, glob = "*.html", recurse = TRUE)
   other_language_docs <- unlist(
@@ -189,10 +189,11 @@ render <- function(
       language_code = .x,
       site_url = site_url,
       type = type,
-      config = config_contents,
+      config = proj_config,
       output_folder = output_folder,
       path_language = main_language,
-      project_dir = path
+      project_dir = path,
+      profile = profile
     )
   )
   purrr::walk(
@@ -200,7 +201,7 @@ render <- function(
     add_cross_links,
     main_language = main_language,
     site_url = site_url,
-    config = config_contents,
+    config = proj_config,
     output_folder = output_folder,
     path_language = main_language
   )
@@ -221,10 +222,11 @@ render <- function(
         language_code = .x,
         site_url = site_url,
         type = type,
-        config = config_contents,
+        config = proj_config,
         output_folder = output_folder,
         path_language = other_lang,
-        project_dir = path
+        project_dir = path,
+        profile = profile
       )
     )
     purrr::walk(
@@ -232,7 +234,7 @@ render <- function(
       add_cross_links,
       main_language = main_language,
       site_url = site_url,
-      config = config_contents,
+      config = proj_config,
       output_folder = output_folder,
       path_language = other_lang
     )
@@ -245,11 +247,11 @@ render <- function(
   }
 }
 
-site_url <- function(config_contents, type) {
+site_url <- function(proj_config, type) {
   if (nzchar(Sys.getenv("BABELQUARTO_CI_URL"))) {
     site_url <- Sys.getenv("BABELQUARTO_CI_URL")
   } else {
-    site_url <- config_contents[[type]][["site-url"]] %||% ""
+    site_url <- proj_config[[type]][["site-url"]] %||% ""
   }
 
   sub("/$", "", site_url)
@@ -260,17 +262,20 @@ render_quarto_lang <- function(
   path,
   output_dir,
   type,
-  site_url
+  site_url,
+  profile # Empty string if no profile supplied
 ) {
   temporary_directory <- withr::local_tempdir()
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
+  proj_path = fs::path(temporary_directory, project_name)
 
-  config_path <- file.path(temporary_directory, project_name, "_quarto.yml")
-  config <- read_yaml(config_path)
+  config_path = fs::path(proj_path, config_file(profile))
+  config_yaml = yaml::read_yaml(config_path)
+  proj_config <- quarto::quarto_inspect(proj_path, profile=profile)$config
 
   freeze_directory_exists <- fs::dir_exists(
-    file.path(temporary_directory, project_name, "_freeze")
+    file.path(proj_path, "_freeze")
   )
 
   if (freeze_directory_exists) {
@@ -281,64 +286,63 @@ render_quarto_lang <- function(
     )
   }
 
-  config[["lang"]] <- language_code
+  config_yaml[["lang"]] <- language_code
 
-  config[[type]][["site-url"]] <- if (endsWith(site_url, "/")) {
+  config_yaml[[type]][["site-url"]] <- if (endsWith(site_url, "/")) {
     sprintf("%s%s", site_url, language_code)
   } else {
     sprintf("%s/%s", site_url, language_code)
   }
+  config_yaml[[type]][["title"]] <- proj_config[[sprintf("title-%s", language_code)]] %||% # nolint: line_length_linter
+    proj_config[[type]][["title"]]
 
-  config[[type]][["title"]] <- config[[sprintf("title-%s", language_code)]] %||% # nolint: line_length_linter
-    config[[type]][["title"]]
-
-  config[[type]][["subtitle"]] <- config[[sprintf(
+  config_yaml[[type]][["subtitle"]] <- proj_config[[sprintf(
     "subtitle-%s",
     language_code
   )]] %||% # nolint: line_length_linter
-    config[[type]][["subtitle"]]
+    proj_config[[type]][["subtitle"]]
 
-  config[[type]][["description"]] <- config[[sprintf(
+  config_yaml[[type]][["description"]] <- proj_config[[sprintf(
     "description-%s",
     language_code
   )]] %||% # nolint: line_length_linter
-    config[[type]][["description"]]
+    proj_config[[type]][["description"]]
 
-  config[[type]][["abstract"]] <- config[[sprintf(
+  config_yaml[[type]][["abstract"]] <- proj_config[[sprintf(
     "abstract-%s",
     language_code
   )]] %||% # nolint: line_length_linter
-    config[[type]][["abstract"]]
+    proj_config[[type]][["abstract"]]
 
   if (type == "book") {
-    config[[type]][["author"]] <- config[[sprintf(
+    config_yaml[[type]][["author"]] <- proj_config[[sprintf(
       "author-%s",
       language_code
     )]] %||% # nolint: line_length_linter
-      config[[type]][["author"]]
+      proj_config[[type]][["author"]]
 
-    config[["book"]][["chapters"]] <- purrr::map(
-      config[["book"]][["chapters"]],
+    config_yaml[["book"]][["chapters"]] <- purrr::map(
+      proj_config[["book"]][["chapters"]],
       use_lang_chapter,
       language_code = language_code,
       book_name = project_name,
       directory = temporary_directory
     )
-    config[["book"]][["appendices"]] <- purrr::map(
-      config[["book"]][["appendices"]],
+    config_yaml[["book"]][["appendices"]] <- purrr::map(
+      proj_config[["book"]][["appendices"]],
       use_lang_chapter,
       language_code = language_code,
       book_name = project_name,
       directory = temporary_directory
     )
-    # Replace TRUE and FALSE with 'true' and 'false'
-    # to avoid converting to "yes" and "no"
-    config <- replace_true_false(config)
-    yaml::write_yaml(
-      config,
-      file = file.path(temporary_directory, project_name, "_quarto.yml")
-    )
+
   }
+
+
+  # Replace TRUE and FALSE with 'true' and 'false'
+  # to avoid converting to "yes" and "no"
+  config_yaml <- replace_true_false(config_yaml)
+  yaml::write_yaml(config_yaml, file = config_path)
 
   if (type == "website") {
     # only keep what's needed, includes .qmd & .ipynb files
@@ -374,31 +378,22 @@ render_quarto_lang <- function(
         sub(sprintf("%s.ipynb", language_code), "ipynb", file_path)
       )}
     }
-    # Replace TRUE and FALSE with 'true' and 'false'
-    # to avoid converting to "yes" and "no"
-    config <- replace_true_false(config)
-
-    yaml::write_yaml(config, file = config_path)
   }
-
-  config_lines <- brio::read_lines(config_path)
-  brio::write_lines(config_lines, path = config_path)
 
   # Render language book
   metadata <- list("yes")
   names(metadata) <- sprintf("lang-%s", language_code)
-
-  withr::with_dir(file.path(temporary_directory, project_name), {
+  withr::with_dir(proj_path, {
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = language_code
+      profile = profile
     )
   })
 
   # Copy it to local not temporary _book/<language-code>
   fs::dir_copy(
-    file.path(temporary_directory, project_name, output_dir),
+    file.path(proj_path, output_dir),
     file.path(path, output_dir, language_code)
   )
 }
@@ -511,28 +506,22 @@ add_links <- function(
   config,
   output_folder,
   path_language,
-  project_dir
+  project_dir,
+  profile
 ) {
   html <- xml2::read_html(path)
 
   document_path <- path
 
-  lang_profile <- fs::path(
-    project_dir,
-    paste0("_quarto-", language_code),
-    ext = "yml"
-  )
-  if (fs::file_exists(lang_profile)) {
-    lang_config <- read_yaml(lang_profile)
-    config <- utils::modifyList(config, lang_config)
-  }
+  # Prioritize configuration specified in language-specific profiles
+  lang_config <- quarto::quarto_inspect(input = project_dir, profile = lang_profiles(profile, language_code))$config
+  config <- utils::modifyList(config, lang_config)
 
-  codes <- config[["babelquarto"]][["languagecodes"]]
-  current_lang <- purrr::keep(codes, ~ .x[["name"]] == language_code)
+  codes <- read_lang_codes(config)
+  current_lang  <- purrr::keep(codes, ~ .x[["name"]] == language_code)
 
   placement <- config[["babelquarto"]][["languagelinks"]] %||%
     switch(type, website = "navbar", book = "sidebar")
-
   sidebar_wanted <- (type == "website" && placement == "sidebar")
   no_sidebar_config <- (is.null(config[["website"]][["sidebar"]]))
   if (sidebar_wanted && no_sidebar_config) {
@@ -733,6 +722,7 @@ add_cross_links <- function(
       other_language_href
     )
   }
+
   other_language_links <- purrr::map_chr(
     config[["babelquarto"]][["languages"]],
     create_other_language_link,
@@ -757,7 +747,7 @@ path_rel <- function(path, output_folder, lang, main_language) {
 }
 
 find_language_name <- function(language_code, config) {
-  codes <- config[["babelquarto"]][["languagecodes"]]
+  codes <- read_lang_codes(config)
 
   if (is.null(codes)) {
     return(toupper(language_code))

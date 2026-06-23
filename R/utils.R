@@ -55,3 +55,25 @@ trim_end <- function(config_lines) {
 
   return(config_lines)
 }
+
+# profile can contain multiple elements, lang can only contain one
+lang_profiles <- function(profile, lang) {
+    if(nzchar(profile)) {
+      return(c(paste0(profile, "-", lang), lang))
+    }
+    return(lang)
+ }
+
+# return configuration file based on supplied profile
+config_file <- function(profile) {
+  for(p in profile) {
+    if(nzchar(profile)) {
+      return( paste0("_quarto-", p, ".yml") )
+    }
+  }
+  "_quarto.yml"
+}
+
+read_lang_codes = function(config) {
+  config[["babelquarto"]][["languagecodes"]] |> split(~name)
+}
