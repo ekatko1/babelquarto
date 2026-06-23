@@ -112,8 +112,7 @@ render <- function(
 
   # render project ----
   temporary_directory <- withr::local_tempdir()
-  # ensure default profile is
-  profile <- profile %||% Sys.getenv("QUARTO_PROFILE")
+  profile <- profile %||% Sys.getenv("QUARTO_PROFILE")  # ensures default profile is not null
   fs::dir_copy(path, temporary_directory)
   withr::with_dir(file.path(temporary_directory, fs::path_file(path)), {
     fs::file_delete(fs::dir_ls(regexp = "\\...\\.qmd|\\...\\.Rmd|\\...\\.ipynb", recurse = TRUE))
