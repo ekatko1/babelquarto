@@ -1,5 +1,5 @@
 test_that("profile config is respected", {
-  parent_dir <- fs::path_dir(withr::local_tempdir())
+  parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
   fs::dir_create(project_dir)
   "project:
@@ -53,7 +53,7 @@ babelquarto:
 
 
 test_that("default profile assigned in _quarto.yml is respected", {
-  parent_dir <- fs::path_dir(withr::local_tempdir())
+  parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
   fs::dir_create(project_dir)
   "project:
@@ -109,7 +109,7 @@ babelquarto:
 
 
 test_that("babelquarto settings can be defined in a profile", {
-  parent_dir <- fs::path_dir(withr::local_tempdir())
+  parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
   fs::dir_create(project_dir)
   r"(
