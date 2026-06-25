@@ -1,3 +1,8 @@
+path_exists <- function(path = "_web-book") {
+  fs::path(project_dir, path) |>
+    file.exists()
+}
+
 test_that("profile config is respected", {
   parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
@@ -38,18 +43,11 @@ babelquarto:
 
   render_book(project_path = project_dir, profile = "web-book")
 
-  # use to check for file existance
-  path_verif <- function(path = "_web-book") {
-    fs::path(project_dir, path) |>
-      file.exists()
-  }
-
-  expect_equal( { path_verif("_web-book")}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "index.html"))}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "exclude.html"))}, { FALSE } )
+  expect_equal( path_exists("_web-book"), TRUE )
+  expect_equal( path_exists(fs::path("_web-book", "index.html")), TRUE )
+  expect_equal( path_exists(fs::path("_web-book", "exclude.html")), FALSE )
 
 })
-
 
 
 test_that("default profile assigned in _quarto.yml is respected", {
@@ -92,18 +90,11 @@ babelquarto:
   fs::file_create(project_dir, "index.qmd")
   fs::file_create(project_dir, "exclude.qmd")
 
-
   render_book(project_path = project_dir, profile = "web-book")
 
-  # use to check for file existance
-  path_verif <- function(path = "_web-book") {
-    fs::path(project_dir, path) |>
-      file.exists()
-  }
-
-  expect_equal( { path_verif("_web-book")}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "index.html"))}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "exclude.html"))}, { FALSE } )
+  expect_equal( path_exists("_web-book"), TRUE )
+  expect_equal(  path_exists(fs::path("_web-book", "index.html")),  TRUE )
+  expect_equal(  path_exists(fs::path("_web-book", "exclude.html")),  FALSE )
 
 })
 
@@ -154,8 +145,6 @@ book:
     - "*.qmd"
 
 format: html
-
-
 )" |>
     brio::write_lines(path = fs::path(project_dir, "_quarto.yml"))
 
@@ -163,19 +152,12 @@ format: html
   fs::file_create(project_dir, "exclude.qmd")
   fs::file_create(project_dir, "include.qmd")
 
-
   render_book(project_path = project_dir, profile = "web-book")
 
-  # use to check for file existance
-  path_verif <- function(path = "_web-book") {
-    fs::path(project_dir, path) |>
-      file.exists()
-  }
-
-  expect_equal( { path_verif("_web-book")}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "index.html"))}, { TRUE } )
-  expect_equal( { path_verif(fs::path("_web-book", "exclude.html"))}, { FALSE } )
-  expect_equal( { path_verif(fs::path("_web-book", "include.html"))}, { TRUE } )
+  expect_equal(  path_exists("_web-book"),  TRUE  )
+  expect_equal(  path_exists(fs::path("_web-book", "index.html")),  TRUE  )
+  expect_equal(  path_exists(fs::path("_web-book", "exclude.html")),  FALSE  )
+  expect_equal(  path_exists(fs::path("_web-book", "include.html")),  TRUE )
   ## Check that part names are respected
   })
 
