@@ -267,10 +267,10 @@ render_quarto_lang <- function(
   temporary_directory <- withr::local_tempdir()
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
-  proj_path = fs::path(temporary_directory, project_name)
+  proj_path <- fs::path(temporary_directory, project_name)
 
-  config_path = fs::path(proj_path, config_file(profile))
-  config_yaml = yaml::read_yaml(config_path)
+  config_path <- config_file(proj_path, profile)
+  config_yaml <- yaml::read_yaml(config_path)
   proj_config <- quarto::quarto_inspect(proj_path, profile=profile)$config
 
   freeze_directory_exists <- fs::dir_exists(
