@@ -95,13 +95,13 @@ render <- function(
   language_codes <- proj_config[["babelquarto"]][["languages"]]
   if (is.null(language_codes)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.languages} in {.field _quarto.yml}"
+      "Can't find {.field babelquarto.languages} in project config (e.g. {.field _quarto.yml})"
     ) # nolint: line_length_linter
   }
   main_language <- proj_config[["babelquarto"]][["mainlanguage"]]
   if (is.null(main_language)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.mainlanguage} in {.field _quarto.yml}"
+      "Can't find {.field babelquarto.mainlanguage} in project config (e.g. {.field _quarto.yml})"
     ) # nolint: line_length_linter
   }
 
