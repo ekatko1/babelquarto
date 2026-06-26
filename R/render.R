@@ -77,7 +77,7 @@ render <- function(
   preview
 ) {
   # configuration ----
-  proj_config = quarto::quarto_inspect(input=path, profile=profile)$config
+  proj_config <- quarto::quarto_inspect(input = path, profile = profile)$config
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
@@ -112,10 +112,13 @@ render <- function(
 
   # render project ----
   temporary_directory <- withr::local_tempdir()
-  profile <- profile %||% Sys.getenv("QUARTO_PROFILE")  # ensures default profile is not null
+  profile <- profile %||% Sys.getenv("QUARTO_PROFILE") # ensures default profile is not null
   fs::dir_copy(path, temporary_directory)
   withr::with_dir(file.path(temporary_directory, fs::path_file(path)), {
-    fs::file_delete(fs::dir_ls(regexp = "\\...\\.qmd|\\...\\.Rmd|\\...\\.ipynb", recurse = TRUE))
+    fs::file_delete(fs::dir_ls(
+      regexp = "\\...\\.qmd|\\...\\.Rmd|\\...\\.ipynb",
+      recurse = TRUE
+    ))
     metadata <- list("true")
     names(metadata) <- sprintf("lang-%s", main_language)
     quarto::quarto_render(
@@ -271,7 +274,7 @@ render_quarto_lang <- function(
 
   config_path <- config_file(proj_path, profile)
   config_yaml <- yaml::read_yaml(config_path)
-  proj_config <- quarto::quarto_inspect(proj_path, profile=profile)$config
+  proj_config <- quarto::quarto_inspect(proj_path, profile = profile)$config
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(proj_path, "_freeze")
@@ -292,7 +295,10 @@ render_quarto_lang <- function(
   } else {
     sprintf("%s/%s", site_url, language_code)
   }
-  config_yaml[[type]][["title"]] <- proj_config[[sprintf("title-%s", language_code)]] %||% # nolint: line_length_linter
+  config_yaml[[type]][["title"]] <- proj_config[[sprintf(
+    "title-%s",
+    language_code
+  )]] %||% # nolint: line_length_linter
     proj_config[[type]][["title"]]
 
   config_yaml[[type]][["subtitle"]] <- proj_config[[sprintf(
@@ -334,9 +340,7 @@ render_quarto_lang <- function(
       book_name = project_name,
       directory = temporary_directory
     )
-
   }
-
 
   # Replace TRUE and FALSE with 'true' and 'false'
   # to avoid converting to "yes" and "no"
@@ -352,30 +356,33 @@ render_quarto_lang <- function(
     )
     language_files <- purrr::keep(
       qmds,
-      \(x) any(
-        endsWith(x, sprintf(".%s.qmd", language_code)),
-        endsWith(x, sprintf(".%s.Rmd", language_code)),
-        endsWith(x, sprintf(".%s.ipynb", language_code))
-      )
+      \(x) {
+        any(
+          endsWith(x, sprintf(".%s.qmd", language_code)),
+          endsWith(x, sprintf(".%s.Rmd", language_code)),
+          endsWith(x, sprintf(".%s.ipynb", language_code))
+        )
+      }
     )
     fs::file_delete(qmds[!(qmds %in% language_files)])
     for (file_path in language_files) {
       # ensure that files are moved correctl, depending on ending
-      if (endsWith(file_path, ".qmd")){
-      fs::file_move(
-        file_path,
-        sub(sprintf("%s.qmd", language_code), "qmd", file_path)
-      )}
-      else if (endsWith(file_path, ".Rmd")){
+      if (endsWith(file_path, ".qmd")) {
+        fs::file_move(
+          file_path,
+          sub(sprintf("%s.qmd", language_code), "qmd", file_path)
+        )
+      } else if (endsWith(file_path, ".Rmd")) {
         fs::file_move(
           file_path,
           sub(sprintf("%s.Rmd", language_code), "Rmd", file_path)
-        )}
-      else {
-      fs::file_move(
-        file_path,
-        sub(sprintf("%s.ipynb", language_code), "ipynb", file_path)
-      )}
+        )
+      } else {
+        fs::file_move(
+          file_path,
+          sub(sprintf("%s.ipynb", language_code), "ipynb", file_path)
+        )
+      }
     }
   }
 
@@ -513,11 +520,14 @@ add_links <- function(
   document_path <- path
 
   # Prioritize configuration specified in language-specific profiles
-  lang_config <- quarto::quarto_inspect(input = project_dir, profile = lang_profiles(profile, language_code))$config
+  lang_config <- quarto::quarto_inspect(
+    input = project_dir,
+    profile = lang_profiles(profile, language_code)
+  )$config
   config <- utils::modifyList(config, lang_config)
 
   codes <- read_lang_codes(config)
-  current_lang  <- purrr::keep(codes, ~ .x[["name"]] == language_code)
+  current_lang <- purrr::keep(codes, ~ .x[["name"]] == language_code)
 
   placement <- config[["babelquarto"]][["languagelinks"]] %||%
     switch(type, website = "navbar", book = "sidebar")

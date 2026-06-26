@@ -58,11 +58,11 @@ trim_end <- function(config_lines) {
 
 # profile can contain multiple elements, lang can only contain one
 lang_profiles <- function(profile, lang) {
-    if(nzchar(profile)) {
-      return(c(paste0(profile, "-", lang), lang))
-    }
-    return(lang)
- }
+  if (nzchar(profile)) {
+    return(c(paste0(profile, "-", lang), lang))
+  }
+  return(lang)
+}
 
 # return a existing configuration file based on highest-priority supplied profile
 # note: first profile is highest priority, see https://github.com/orgs/quarto-dev/discussions/14612
@@ -71,18 +71,18 @@ config_file <- function(proj_path, profile) {
     profile |>
     purrr::keep(nzchar) |>
     c("") |> # default profile last
-    purrr::map( \(p) {
+    purrr::map(\(p) {
       c("yml", "yaml") |> # quarto config files can take on either extension
-      purrr::map( \(ext) {
-        f_name = ifelse(nzchar(p), paste0("_quarto-", p), "_quarto")
-        f_path = fs::path(proj_path, f_name, ext = ext)
-        ifelse(file.exists(f_path), f_path, "")
-      })
+        purrr::map(\(ext) {
+          f_name <- ifelse(nzchar(p), paste0("_quarto-", p), "_quarto")
+          f_path <- fs::path(proj_path, f_name, ext = ext)
+          ifelse(file.exists(f_path), f_path, "")
+        })
     }) |>
     unlist() |>
     purrr::keep(nzchar)
 
-  if(length(config_path) == 0L) {
+  if (length(config_path) == 0L) {
     cli::cli_abort(
       "No specified profile ({profile}) or default configuration file (e.g. _quarto.yml) found in {proj_path}"
     ) # nolint: line_length_linter
@@ -90,6 +90,6 @@ config_file <- function(proj_path, profile) {
   config_path[1]
 }
 
-read_lang_codes = function(config) {
+read_lang_codes <- function(config) {
   config[["babelquarto"]][["languagecodes"]] |> split(~name)
 }
