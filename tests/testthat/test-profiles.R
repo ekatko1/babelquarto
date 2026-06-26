@@ -1,7 +1,39 @@
-path_exists <- function(path = "_web-book") {
-  fs::path(project_dir, path) |>
+path_exists <- function(...) {
+  fs::path(...) |>
     file.exists()
 }
+
+# Eventually, Quarto will take care of throwing a warning
+test_that("supplying a non-existant profile does not cause an error", {
+  parent_dir <- withr::local_tempdir()
+  project_dir <- fs::path(parent_dir, "blop")
+  fs::dir_create(project_dir)
+  "project:
+  type: book
+
+format: html
+
+book:
+  chapters:
+    - index.qmd
+
+babelquarto:
+  languagecodes:
+  - name: fr
+    text: 'Version en français'
+  - name: en
+    text: 'English version'
+  mainlanguage: 'fr'
+  languages: 'en'
+  " |>
+    brio::write_lines(path = fs::path(project_dir, "_quarto.yml"))
+
+  fs::file_create(project_dir, "index.qmd")
+
+  render_book(project_path = project_dir, profile = "web-book")
+  expect_equal( path_exists(project_dir, "_book", "index.html"), TRUE )
+})
+
 
 test_that("profile config is respected", {
   parent_dir <- withr::local_tempdir()
@@ -43,9 +75,9 @@ babelquarto:
 
   render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal( path_exists("_web-book"), TRUE )
-  expect_equal( path_exists(fs::path("_web-book", "index.html")), TRUE )
-  expect_equal( path_exists(fs::path("_web-book", "exclude.html")), FALSE )
+  expect_equal( path_exists(project_dir, "_web-book"), TRUE )
+  expect_equal( path_exists(project_dir, "_web-book", "index.html"), TRUE )
+  expect_equal( path_exists(project_dir, "_web-book", "exclude.html"), FALSE )
 
 })
 
@@ -92,10 +124,9 @@ babelquarto:
 
   render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal( path_exists("_web-book"), TRUE )
-  expect_equal(  path_exists(fs::path("_web-book", "index.html")),  TRUE )
-  expect_equal(  path_exists(fs::path("_web-book", "exclude.html")),  FALSE )
-
+  expect_equal( path_exists(project_dir, "_web-book"), TRUE )
+  expect_equal(  path_exists(project_dir, "_web-book", "index.html"),  TRUE )
+  expect_equal(  path_exists(project_dir, "_web-book", "exclude.html"),  FALSE )
 })
 
 
@@ -154,10 +185,10 @@ format: html
 
   render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal(  path_exists("_web-book"),  TRUE  )
-  expect_equal(  path_exists(fs::path("_web-book", "index.html")),  TRUE  )
-  expect_equal(  path_exists(fs::path("_web-book", "exclude.html")),  FALSE  )
-  expect_equal(  path_exists(fs::path("_web-book", "include.html")),  TRUE )
+  expect_equal(  path_exists(project_dir, "_web-book"),  TRUE  )
+  expect_equal(  path_exists(project_dir, "_web-book", "index.html"),  TRUE  )
+  expect_equal(  path_exists(project_dir, "_web-book", "exclude.html"),  FALSE  )
+  expect_equal(  path_exists(project_dir, "_web-book", "include.html"),  TRUE )
   ## Check that part names are respected
   })
 
