@@ -56,14 +56,6 @@ trim_end <- function(config_lines) {
   return(config_lines)
 }
 
-# profile can contain multiple elements, lang can only contain one
-lang_profiles <- function(profile, lang) {
-  if (nzchar(profile)) {
-    return(c(paste0(profile, "-", lang), lang))
-  }
-  return(lang)
-}
-
 # return a existing configuration file based on highest-priority supplied profile
 # note: first profile is highest priority, see https://github.com/orgs/quarto-dev/discussions/14612
 config_file <- function(proj_path, profile) {

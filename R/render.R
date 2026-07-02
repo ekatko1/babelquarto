@@ -124,7 +124,7 @@ render <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = profile
+      profile = c(main_language, profile)
     )
   })
   fs::dir_copy(
@@ -271,10 +271,9 @@ render_quarto_lang <- function(
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
   proj_path <- fs::path(temporary_directory, project_name)
-
-  config_path <- config_file(proj_path, profile)
+  config_path <- config_file(proj_path, c(language_code, profile))
   config_yaml <- read_yaml(config_path)
-  proj_config <- quarto::quarto_inspect(proj_path, profile = profile)$config
+  proj_config <- quarto::quarto_inspect(proj_path, profile = c(language_code, profile))$config
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(proj_path, "_freeze")
@@ -393,7 +392,7 @@ render_quarto_lang <- function(
     quarto::quarto_render(
       as_job = FALSE,
       metadata = metadata,
-      profile = profile
+      profile = c(language_code, profile)
     )
   })
 
@@ -522,7 +521,7 @@ add_links <- function(
   # Prioritize configuration specified in language-specific profiles
   lang_config <- quarto::quarto_inspect(
     input = project_dir,
-    profile = lang_profiles(profile, language_code)
+    profile = c(language_code, profile)
   )$config
   config <- utils::modifyList(config, lang_config)
 
