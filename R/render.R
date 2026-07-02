@@ -273,7 +273,10 @@ render_quarto_lang <- function(
   proj_path <- fs::path(temporary_directory, project_name)
   config_path <- config_file(proj_path, c(language_code, profile))
   config_yaml <- read_yaml(config_path)
-  proj_config <- quarto::quarto_inspect(proj_path, profile = c(language_code, profile))$config
+  proj_config <- quarto::quarto_inspect(
+    proj_path,
+    profile = c(language_code, profile)
+  )$config
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(proj_path, "_freeze")
