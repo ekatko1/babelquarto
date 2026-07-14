@@ -95,13 +95,13 @@ render <- function(
   language_codes <- proj_config[["babelquarto"]][["languages"]]
   if (is.null(language_codes)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.languages} in project config (e.g. {.field _quarto.yml})"
+      "Can't find {.field babelquarto.languages} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config})"
     ) # nolint: line_length_linter
   }
   main_language <- proj_config[["babelquarto"]][["mainlanguage"]]
   if (is.null(main_language)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.mainlanguage} in project config (e.g. {.field _quarto.yml})"
+      "Can't find {.field babelquarto.mainlanguage} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}"
     ) # nolint: line_length_linter
   }
 
@@ -112,7 +112,7 @@ render <- function(
 
   # render project ----
   temporary_directory <- withr::local_tempdir()
-  profile <- profile %||% Sys.getenv("QUARTO_PROFILE") # ensures default profile is not null
+  profile <- profile %||% Sys.getenv("QUARTO_PROFILE") # ensures default profile = "",  not NULL
   fs::dir_copy(path, temporary_directory)
   withr::with_dir(file.path(temporary_directory, fs::path_file(path)), {
     fs::file_delete(fs::dir_ls(
@@ -537,14 +537,14 @@ add_links <- function(
   no_sidebar_config <- (is.null(config[["website"]][["sidebar"]]))
   if (sidebar_wanted && no_sidebar_config) {
     cli::cli_abort(c(
-      "Can't find {.field website.sidebar} in {.field _quarto.yml}.",
+      "Can't find {.field website.sidebar} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}.",
       i = "You set the {.field babelquarto.languagelinks} to {.field sidebar} but also don't have a sidebar in your website." # nolint: line_length_linter
     ))
   }
 
   if (placement == "navbar" && is.null(config[[type]][["navbar"]])) {
     cli::cli_abort(c(
-      "Can't find {.field {type}.navbar} in {.field _quarto.yml}.",
+      "Can't find {.field {type}.navbar} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}.",
       i = "You set the {.field babelquarto/languagelinks} to {.field navbar} but also don't have a navbar in your {type}." # nolint: line_length_linter
     ))
   }
