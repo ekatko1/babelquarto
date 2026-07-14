@@ -397,6 +397,12 @@ render_quarto_lang <- function(
       metadata = metadata,
       profile = c(language_code, profile)
     )
+    # remove CNAME is present
+    # it should only be there for the main language
+    cname_path <- file.path(output_dir, "CNAME")
+    if (file.exists(cname_path)) {
+      file.remove(cname_path)
+    }
   })
 
   # Copy it to local not temporary _book/<language-code>
