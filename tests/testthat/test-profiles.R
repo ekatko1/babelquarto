@@ -1,9 +1,4 @@
-path_exists <- function(...) {
-  fs::path(...) |>
-    file.exists()
-}
-
-# Eventually, Quarto will take care of throwing a warning
+# Eventually, Quarto will take care of throwing a warning (https://github.com/quarto-dev/quarto-cli/issues/13368)
 test_that("supplying a non-existant profile does not cause an error", {
   parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
@@ -31,7 +26,7 @@ babelquarto:
   fs::file_create(project_dir, "index.qmd")
 
   render_book(project_path = project_dir, profile = "web-book")
-  expect_equal( path_exists(project_dir, "_book", "index.html"), TRUE )
+  expect_file_exists(fs::path(project_dir, "_book", "index.html"))
 })
 
 
@@ -49,7 +44,7 @@ book:
   chapters:
     - index.qmd
 " |>
-  brio::write_lines(path = fs::path(project_dir, "_quarto-web-book.yml"))
+    brio::write_lines(path = fs::path(project_dir, "_quarto-web-book.yml"))
 
   r"(project:
   output-dir: _docs
@@ -72,13 +67,11 @@ babelquarto:
   fs::file_create(project_dir, "index.qmd")
   fs::file_create(project_dir, "exclude.qmd")
 
-
   render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal( path_exists(project_dir, "_web-book"), TRUE )
-  expect_equal( path_exists(project_dir, "_web-book", "index.html"), TRUE )
-  expect_equal( path_exists(project_dir, "_web-book", "exclude.html"), FALSE )
-
+  expect_dir_exists(fs::path(project_dir, "_web-book"))
+  expect_file_exists(fs::path(project_dir, "_web-book", "index.html"))
+  expect_file_absent(fs::path(project_dir, "_web-book", "exclude.html"))
 })
 
 
@@ -124,8 +117,7 @@ babelquarto:
 
   render_book(project_path = project_dir, profile = "web-book")
 
-  expect_equal( path_exists(project_dir, "_web-book"), TRUE )
-  expect_equal(  path_exists(project_dir, "_web-book", "index.html"),  TRUE )
-  expect_equal(  path_exists(project_dir, "_web-book", "exclude.html"),  FALSE )
+  expect_dir_exists(fs::path(project_dir, "_web-book"))
+  expect_file_exists(fs::path(project_dir, "_web-book", "index.html"))
+  expect_file_absent(fs::path(project_dir, "_web-book", "exclude.html"))
 })
-
