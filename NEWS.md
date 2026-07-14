@@ -1,6 +1,7 @@
 # babelquarto (development version)
 
-- Add support for language-specific abstract in books
+- Add support for language-specific abstract in books.
+- Improve support and documentation for quarto profiles (now using `quarto::quarto_inspect()` to obtain correct profile-specific configuration).
 
 # babelquarto 0.1.0
 
