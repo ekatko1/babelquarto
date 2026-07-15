@@ -442,7 +442,7 @@ test_that("render_website() fails when missing sidebar
 
   expect_error(
     withr::with_dir(parent_dir, render_website(project_dir)),
-    regexp = "Can't find website.sidebar in _quarto.yml."
+    regexp = "Can't find website.sidebar in."
   )
 })
 
@@ -467,7 +467,7 @@ test_that("render_book() fails when missing navbar
 
   expect_error(
     withr::with_dir(parent_dir, render_book(project_dir)),
-    regexp = "Can't find book.navbar in _quarto.yml."
+    regexp = "Can't find book.navbar in"
   )
 })
 

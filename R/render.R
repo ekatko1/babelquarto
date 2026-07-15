@@ -77,7 +77,8 @@ render <- function(
   preview
 ) {
   # configuration ----
-  proj_config <- quarto::quarto_inspect(input = path, profile = profile)$config
+  q_inspect <- quarto::quarto_inspect(input = path, profile = profile)
+  proj_config <- q_inspect$config
 
   if (is.null(site_url) && rlang::is_interactive()) {
     site_url <- ""
@@ -93,15 +94,16 @@ render <- function(
     )
 
   language_codes <- proj_config[["babelquarto"]][["languages"]]
+  config_files <- q_inspect$files$config
   if (is.null(language_codes)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.languages} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config})"
+      "Can't find {.field babelquarto.languages} in {length(config_files)} project configuration file{?s}: {config_files}"
     ) # nolint: line_length_linter
   }
   main_language <- proj_config[["babelquarto"]][["mainlanguage"]]
   if (is.null(main_language)) {
     cli::cli_abort(
-      "Can't find {.field babelquarto.mainlanguage} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}"
+      "Can't find {.field babelquarto.mainlanguage} in {length(config_files)} project configuration file{?s}: {config_files}"
     ) # nolint: line_length_linter
   }
 
@@ -533,10 +535,11 @@ add_links <- function(
   document_path <- path
 
   # Prioritize configuration specified in language-specific profiles
-  lang_config <- quarto::quarto_inspect(
+  q_inspect <- quarto::quarto_inspect(
     input = project_dir,
     profile = c(language_code, profile)
-  )$config
+  )
+  lang_config <- q_inspect$config
   config <- utils::modifyList(config, lang_config)
 
   codes <- read_lang_codes(config)
@@ -546,16 +549,18 @@ add_links <- function(
     switch(type, website = "navbar", book = "sidebar")
   sidebar_wanted <- (type == "website" && placement == "sidebar")
   no_sidebar_config <- (is.null(config[["website"]][["sidebar"]]))
+
+  config_files <- q_inspect$files$config
   if (sidebar_wanted && no_sidebar_config) {
     cli::cli_abort(c(
-      "Can't find {.field website.sidebar} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}.",
+      "Can't find {.field website.sidebar} in {length(config_files)} project configuration file{?s}: {config_files}",
       i = "You set the {.field babelquarto.languagelinks} to {.field sidebar} but also don't have a sidebar in your website." # nolint: line_length_linter
     ))
   }
 
   if (placement == "navbar" && is.null(config[[type]][["navbar"]])) {
     cli::cli_abort(c(
-      "Can't find {.field {type}.navbar} in project configuration file(s): {quarto::quarto_inspect(input = path, profile = profile)$files$config}.",
+      "Can't find {.field {type}.navbar} in {length(config_files)} project configuration file{?s}: {config_files}",
       i = "You set the {.field babelquarto/languagelinks} to {.field navbar} but also don't have a navbar in your {type}." # nolint: line_length_linter
     ))
   }
