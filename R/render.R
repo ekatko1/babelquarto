@@ -271,12 +271,17 @@ render_quarto_lang <- function(
   fs::dir_copy(path, temporary_directory)
   project_name <- fs::path_file(path)
   proj_path <- fs::path(temporary_directory, project_name)
-  config_path <- config_file(proj_path, c(language_code, profile))
-  config_yaml <- read_yaml(config_path)
+
+  # source for truth in terms of user intent
+  # (not in yaml format and with tags that quarto does not understand)
   proj_config <- quarto::quarto_inspect(
     proj_path,
     profile = c(language_code, profile)
   )$config
+
+  # destination for encoding user intent into yaml that quarto can understand
+  config_path <- config_file(proj_path, c(language_code, profile))
+  config_yaml <- read_yaml(config_path)
 
   freeze_directory_exists <- fs::dir_exists(
     file.path(proj_path, "_freeze")
