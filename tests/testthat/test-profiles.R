@@ -1,4 +1,4 @@
-# Eventually, Quarto will take care of throwing a warning (https://github.com/quarto-dev/quarto-cli/issues/13368)
+# TODO: check if Quarto throws warning when supplying a non-existant profile (https://github.com/quarto-dev/quarto-cli/issues/13368)
 test_that("supplying a non-existant profile does not cause an error", {
   parent_dir <- withr::local_tempdir()
   project_dir <- fs::path(parent_dir, "blop")
